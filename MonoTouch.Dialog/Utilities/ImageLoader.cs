@@ -273,6 +273,8 @@ namespace MonoTouch.Dialog.Utilities
 						}
 	                }
 				}
+				if (File.Exists(target))
+					File.Delete(target);
 				File.Move (tmpfile, target);
 				return true;
 			} catch (Exception e) {
