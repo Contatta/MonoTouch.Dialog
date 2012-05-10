@@ -35,7 +35,7 @@ namespace MonoTouch.Dialog {
 		public void Update (string sender, string body, string subject, DateTime date, bool newFlag, int messageCount)
 		{
 			Sender = sender;
-			Body = body;
+			Body = body ?? String.Empty;
 			Subject = subject;
 			Date = date;
 			NewFlag = newFlag;
