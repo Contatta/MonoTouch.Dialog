@@ -17,6 +17,8 @@ namespace MonoTouch.Dialog
 		protected abstract TType GetValue();
 		
 		public static implicit operator TType(PropertyStore<TType> val) {
+			if (val == null)
+				return default(TType);
 			return val.Value;
 		}
 	}
