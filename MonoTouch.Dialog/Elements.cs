@@ -30,6 +30,9 @@ namespace MonoTouch.Dialog
 	/// Base class for all elements in MonoTouch.Dialog
 	/// </summary>
 	public class Element : IDisposable {
+		
+		public object Tag;	// place to store arbitrary data
+		
 		/// <summary>
 		///  Handle to the container object.
 		/// </summary>
