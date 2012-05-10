@@ -1993,7 +1993,7 @@ namespace MonoTouch.Dialog
 			return cell;
 		}
 		
-		public float GetHeight (UITableView tableView, NSIndexPath indexPath)
+		public virtual float GetHeight (UITableView tableView, NSIndexPath indexPath)
 		{
 			return View.Bounds.Height;
 		}
