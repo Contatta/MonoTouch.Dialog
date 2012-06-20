@@ -15,7 +15,7 @@ namespace MonoTouch.Dialog {
 		public string Body { get; private set; }
 		public string Subject { get; private set; }
 		public DateTime Date { get; private set; }
-		public bool NewFlag  { get; private set; }
+		public bool NewFlag  { get; set; }
 		public int MessageCount  { get; private set; }
 		
 		static CGGradient gradient;
