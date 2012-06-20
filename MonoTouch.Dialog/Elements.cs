@@ -731,7 +731,7 @@ namespace MonoTouch.Dialog
 		
 		public override bool Matches (string text)
 		{
-			return (Value.Value != null ? Value.Value.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1: false) || base.Matches (text);
+			return ((Value != null && Value.Value != null) ? Value.Value.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1: false) || base.Matches (text);
 		}
 	}
 	
