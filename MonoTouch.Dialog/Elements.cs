@@ -47,6 +47,8 @@ namespace MonoTouch.Dialog
 		///  The caption to display for this given element
 		/// </summary>
 		public string Caption;
+
+		public UITableViewCellEditingStyle EditingStyle = UITableViewCellEditingStyle.None;
 		
 		/// <summary>
 		///  Initializes the element with the given caption.

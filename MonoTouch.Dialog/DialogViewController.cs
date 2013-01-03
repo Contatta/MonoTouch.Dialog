@@ -391,6 +391,23 @@ namespace MonoTouch.Dialog
 					return -1;
 				return section.FooterView.Frame.Height;
 			}
+
+			public override UITableViewCellEditingStyle EditingStyleForRow(UITableView tableView, NSIndexPath indexPath) {
+				var section = Root.Sections [indexPath.Section];
+				var element = section.Elements [indexPath.Row];
+				return element.EditingStyle;
+			}
+
+			public override bool ShouldIndentWhileEditing(UITableView tableView, NSIndexPath indexPath) {
+				var section = Root.Sections [indexPath.Section];
+				var element = section.Elements [indexPath.Row];
+				return element.EditingStyle != UITableViewCellEditingStyle.None;
+			}
+
+			public override void CommitEditingStyle(UITableView tableView, UITableViewCellEditingStyle editingStyle, NSIndexPath indexPath) {
+				var section = Root.Sections [indexPath.Section];
+				var element = section.Elements [indexPath.Row];
+			}
 			
 			#region Pull to Refresh support
 			public override void Scrolled (UIScrollView scrollView)
