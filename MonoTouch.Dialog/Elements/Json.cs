@@ -542,7 +542,7 @@ namespace MonoTouch.Dialog {
 			NSAction onaccessorytap = null;
 			int? lines = null;
 			UITableViewCellAccessory? accessory = null;
-			UILineBreakMode? linebreakmode=null;
+			UILineBreakMode? linebreakmode = null;
 			UITextAlignment? alignment = null;
 			UIColor textcolor = null, detailcolor = null;
 			UIFont font = null;
@@ -572,9 +572,16 @@ namespace MonoTouch.Dialog {
 					NSAction d = delegate {
 						string cname = sontap.Substring (0, p);
 						string mname = sontap.Substring (p+1);
-						var mi = Type.GetType (cname).GetMethod (mname, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-						if (mi != null)
-							mi.Invoke (null, new object [] { data });
+						foreach (var a in AppDomain.CurrentDomain.GetAssemblies ()){
+							Type type = a.GetType (cname);
+						
+							if (type != null){
+								var mi = type.GetMethod (mname, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+								if (mi != null)
+									mi.Invoke (null, new object [] { data });
+								break;
+							}
+						}
 					};
 					if (kv.Key == "ontap")
 						ontap = d;

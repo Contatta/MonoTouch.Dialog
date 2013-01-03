@@ -613,18 +613,6 @@ namespace MonoTouch.Dialog
 				this.container = container;
 			}
 			
-			public override void ViewWillDisappear (bool animated)
-			{
-				base.ViewWillDisappear (animated);
-				NetworkActivity = false;
-				if (container.web == null)
-					return;
-
-				container.web.StopLoading ();
-				container.web.Dispose ();
-				container.web = null;
-			}
-
 			public bool Autorotate { get; set; }
 			
 			public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
@@ -635,6 +623,7 @@ namespace MonoTouch.Dialog
 		
 		public override void Selected (DialogViewController dvc, UITableView tableView, NSIndexPath path)
 		{
+			int i = 0;
 			var vc = new WebViewController (this) {
 				Autorotate = dvc.Autorotate
 			};
@@ -645,14 +634,22 @@ namespace MonoTouch.Dialog
 				AutoresizingMask = UIViewAutoresizing.All
 			};
 			web.LoadStarted += delegate {
+				// this is called several times and only one UIActivityIndicatorView is needed
+				if (i++ == 0) {
+					var indicator = new UIActivityIndicatorView (UIActivityIndicatorViewStyle.White);
+					vc.NavigationItem.RightBarButtonItem = new UIBarButtonItem (indicator);
+					indicator.StartAnimating ();
+				}
 				NetworkActivity = true;
-				var indicator = new UIActivityIndicatorView(UIActivityIndicatorViewStyle.White);
-				vc.NavigationItem.RightBarButtonItem = new UIBarButtonItem(indicator);
-				indicator.StartAnimating();
 			};
 			web.LoadFinished += delegate {
+				if (--i == 0) {
+					// we stopped loading, remove indicator and dispose of UIWebView
+					vc.NavigationItem.RightBarButtonItem = null;
+					web.StopLoading ();
+					web.Dispose ();
+				}
 				NetworkActivity = false;
-				vc.NavigationItem.RightBarButtonItem = null;
 			};
 			web.LoadError += (webview, args) => {
 				NetworkActivity = false;
@@ -881,14 +878,16 @@ namespace MonoTouch.Dialog
 			} else {
 				var imgView = cell.ImageView;
 				UIImage img;
-				
-				if (extraInfo.Uri != null)
-					img = ImageLoader.DefaultRequestImage (extraInfo.Uri, this);
-				else if (extraInfo.Image != null)
-					img = extraInfo.Image;
-				else 
-					img = null;
-				imgView.Image = img;
+
+				if (imgView != null) {
+					if (extraInfo.Uri != null)
+						img = ImageLoader.DefaultRequestImage (extraInfo.Uri, this);
+					else if (extraInfo.Image != null)
+						img = extraInfo.Image;
+					else 
+						img = null;
+					imgView.Image = img;
+				}
 
 				if (cell.DetailTextLabel != null)
 					cell.DetailTextLabel.TextColor = extraInfo.DetailColor ?? UIColor.Gray;
@@ -1335,8 +1334,8 @@ namespace MonoTouch.Dialog
 				if (cell == null)
 					useRect = rect;
 				else
-					rect = cell.Frame;
-				popover.PresentFromRect (rect, dvc.View, UIPopoverArrowDirection.Any, true);
+					useRect = cell.Frame;
+				popover.PresentFromRect (useRect, dvc.View, UIPopoverArrowDirection.Any, true);
 				break;
 				
 			default:
@@ -1568,12 +1567,13 @@ namespace MonoTouch.Dialog
 				ClearButtonMode = ClearButtonMode
 			};
 		}
-		
-		static NSString cellkey = new NSString ("EntryElement");
+
+		static readonly NSString passwordKey = new NSString ("EntryElement+Password");
+		static readonly NSString cellkey = new NSString ("EntryElement");
 		
 		protected override NSString CellKey {
 			get {
-				return cellkey;
+				return isPassword ? passwordKey : cellkey;
 			}
 		}
 		
@@ -1583,6 +1583,10 @@ namespace MonoTouch.Dialog
 			if (cell == null){
 				cell = new UITableViewCell (UITableViewCellStyle.Default, CellKey);
 				cell.SelectionStyle = UITableViewCellSelectionStyle.None;
+
+				var offset = (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone) ? 20 : 90;
+				cell.Frame = new RectangleF(cell.Frame.X, cell.Frame.Y, tv.Frame.Width-offset, cell.Frame.Height);
+
 			} else 
 				RemoveTag (cell, 1);
 			
@@ -1753,6 +1757,7 @@ namespace MonoTouch.Dialog
 		public PropertyStore<DateTime> DateValue;
 		public UIDatePicker datePicker;
 		public event Action<DateTimeElement> DateSelected;
+		public UIColor BackgroundColor = UIColor.Black;
 		
 		protected internal NSDateFormatter fmt = new NSDateFormatter () {
 			DateStyle = NSDateFormatterStyle.Short
@@ -1873,11 +1878,12 @@ namespace MonoTouch.Dialog
 				Autorotate = dvc.Autorotate
 			};
 			datePicker = CreatePicker ();
-			datePicker.Frame = PickerFrameWithSize (datePicker.SizeThatFits (SizeF.Empty));
 			                            
-			vc.View.BackgroundColor = UIColor.Black;
+			vc.View.BackgroundColor = BackgroundColor;
 			vc.View.AddSubview (datePicker);
 			dvc.ActivateController (vc);
+
+			datePicker.Frame = PickerFrameWithSize (datePicker.SizeThatFits (SizeF.Empty));
 		}
 	}
 	
